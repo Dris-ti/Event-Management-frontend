@@ -12,7 +12,12 @@ export default function Navbar() {
     <div className='max-w-7xl mx-auto px-6 py-6 fixed top-0 left-0'>
       <div className="flex flex-col md:flex-row items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <FaGift className="text-xl" />
+                  <img
+                    src="/logo.svg"
+                    alt="Logo"
+                    className="w-7 h-7 rounded-full"
+                  />
+
                   <span className="text-xl font-semibold">
                     Event buddy<span className="text-purple-700">.</span>
                   </span>

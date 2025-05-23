@@ -10,7 +10,11 @@ export default function Footer() {
         {/* Top Row: Logo + Links */}
         <div className="flex flex-col md:flex-row items-center justify-between mb-4">
           <div className="flex items-center gap-2">
-            <FaGift className="text-xl" />
+            <img
+                    src="/logo.svg"
+                    alt="Logo"
+                    className="w-7 h-7 rounded-full"
+                  />
             <span className="text-xl font-semibold">
               Event buddy<span className="text-purple-700">.</span>
             </span>
