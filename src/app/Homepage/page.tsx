@@ -9,26 +9,20 @@ import { useRouter } from 'next/navigation';
 
 import { RiSearch2Line } from "react-icons/ri";
 import { BiChair } from "react-icons/bi";
+import { VscCircleSmallFilled } from "react-icons/vsc";
 import { CalendarDays, MapPin, Clock } from 'lucide-react';
+import { EVENT } from '../Types/AllTypes'
+import { getUserFromCookie } from '../lib/auth'
+import { NextApiRequest } from 'next';
 
-interface EVENT {
-  id: string,
-  title: string,
-  description: string,
-  location: string,
-  date: string,
-  time: string,
-  max_seats: number,
-  available_seats: number,
-  image_url: string,
-}
 
-export default function Home() {
+export default function Home({user} : any) {
   const [search, setsearch] = React.useState<EVENT[]>([]);
   const [futureEvents, setFutureEvents] = React.useState<EVENT[]>([]);
   const [pastEvents, setPastEvents] = React.useState<EVENT[]>([]);
 
   const eventsPerPage = 6;
+  const router = useRouter();
 
 
   // Pagination for Future Events
@@ -80,7 +74,7 @@ const pastEventsPage = pastEvents.slice(
       }
     };
     fetchUpcomingEvents();
-  }, []);
+  }, [router]);
 
 
   useEffect(() => {
@@ -89,8 +83,7 @@ const pastEventsPage = pastEvents.slice(
         const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}user/pastEvents`, {
           withCredentials: true,
         });
-
-        console.log("RES P: " +response.data.data);
+        
 
         if (response.status === 200) {
           setPastEvents(response.data.data);
@@ -117,6 +110,10 @@ const pastEventsPage = pastEvents.slice(
     };
     fetchPastEvents();
   }, []);
+
+  const handleRowClick = (id: string) => {
+    router.push(`/Homepage/${id}`);
+  }
 
 
 
@@ -163,7 +160,7 @@ const pastEventsPage = pastEvents.slice(
 
   return (
     <div>
-      <Navbar />
+      <Navbar user={user}/>
       {/* --------------------------------------- Hero Section ------------------------------------------------*/}
       <div className='w-screen h-screen justify-center items-center absolute '>
         <img
@@ -221,13 +218,14 @@ const pastEventsPage = pastEvents.slice(
 
       {/* ------------------------------------------------ Upcoming events ------------------------------------------------*/}
       <div>
-        <div className="bg-[#f9f9ff] py-12 px-6">
+        <div className="bg-[#f9f9ff] py-12 px-6 cursor-pointer">
           <h2 className="text-3xl font-bold text-[#1e1e4b] mb-8">Upcoming Events</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {futureEventsPage.map((event) => (
               <div
                 key={event.id}
                 className="bg-white rounded-2xl shadow p-4 hover:shadow-md transition-all"
+                onClick={()=> handleRowClick(event.id)}
               >
                 <div className="rounded overflow-hidden mb-4">
                   <img
@@ -270,16 +268,17 @@ const pastEventsPage = pastEvents.slice(
                         <MapPin size={16} color='#8570AD'/> {event.location}
                       </div>
                     </div>
-                    {/* <div className="flex gap-2 mb-2">
-                      {event.tags.map((tag) => (
+                    <div className="flex gap-2 mb-2 ml-2">
+                      {event.tag?.map((tag) => (
+                        
                         <span
                           key={tag}
-                          className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded"
+                          className="bg-[#DADEFF] text-[#1D4ED8] text-sm font-medium px-3 py-1 pl-1 rounded flex flex-row items-start"
                         >
-                          #{tag}
+                          <VscCircleSmallFilled />{tag}
                         </span>
                       ))}
-                    </div> */}
+                    </div>
                     <div className="text-sm text-gray-500 flex justify-between items-center border-t pt-2">
                       <span className="flex items-center gap-1 text-[#8570AD]">
                         <BiChair size={18} color='#8570AD'/>
@@ -307,13 +306,14 @@ const pastEventsPage = pastEvents.slice(
 
       {/* ------------------------------------------------ Past events ------------------------------------------------*/}
       <div>
-        <div className="bg-[#f9f9ff] py-12 px-6">
+        <div className="bg-[#f9f9ff] py-12 px-6 cursor-pointer">
           <h2 className="text-3xl font-bold text-[#1e1e4b] mb-8">Previous Events</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pastEventsPage.map((event) => (
               <div
                 key={event.id}
                 className="bg-white rounded-2xl shadow p-4 hover:shadow-md transition-all"
+                onClick={()=> handleRowClick(event.id)}
               >
                 <div className="rounded overflow-hidden mb-4">
                   <img
@@ -356,16 +356,17 @@ const pastEventsPage = pastEvents.slice(
                         <MapPin size={16} color='#8570AD'/> {event.location}
                       </div>
                     </div>
-                    {/* <div className="flex gap-2 mb-2">
-                      {event.tags.map((tag) => (
+                    <div className="flex gap-2 mb-2">
+                      {event.tag?.map((tag) => (
+                        
                         <span
                           key={tag}
-                          className="bg-blue-100 text-blue-700 text-xs font-medium px-2 py-1 rounded"
+                          className="bg-[#DADEFF] text-[#1D4ED8] text-sm font-medium px-3 py-1 pl-1 rounded flex flex-row items-start"
                         >
-                          #{tag}
+                          <VscCircleSmallFilled />{tag}
                         </span>
                       ))}
-                    </div> */}
+                    </div>
                     <div className="text-sm text-gray-500 flex justify-between items-center border-t pt-2">
                       <span className="flex items-center gap-1 text-[#8570AD]">
                         <BiChair size={18} color='#8570AD'/>
@@ -401,3 +402,4 @@ const pastEventsPage = pastEvents.slice(
     </div>
   )
 }
+

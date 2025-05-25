@@ -4,6 +4,7 @@ import React from 'react'
 import Navbar from '../Components/Navbar/page'
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import { Session } from 'inspector/promises';
 
 
 export default function signin() {
@@ -14,7 +15,7 @@ export default function signin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    try{
+    try {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}auth/login` || "", {
         email,
         password
@@ -22,31 +23,39 @@ export default function signin() {
         withCredentials: true,
       });
 
-      if(response.status === 200){
-        router.replace("/Home");
+      if (response.status === 200) {
+        if (response.data.data == "admin") {
+          router.replace("/AdminDashboard");
+          console.log("Admin logged in successfully");
+        }
+        else {
+          router.replace("/Homepage");
+          console.log("User logged in successfully");
+        }
+
       }
 
-    }catch(error){
+    } catch (error) {
       if (axios.isAxiosError(error) && error.response) {
-                // Handle server response errors
-                const { status, data } = error.response;
-                if (status === 401) {
-                    alert(data?.error?.message || "Invalid email or password");
-                } else {
-                    alert("An unexpected error occurred. Please try again.");
-                }
-            } else {
-                // Handle unexpected errors
-                console.error("Error:", error);
-                alert("Network or server error. Please try again. " + error);
-            }
+        // Handle server response errors
+        const { status, data } = error.response;
+        if (status === 401) {
+          alert(data?.error?.message || "Invalid email or password");
+        } else {
+          alert("An unexpected error occurred. Please try again.");
+        }
+      } else {
+        // Handle unexpected errors
+        console.error("Error:", error);
+        alert("Network or server error. Please try again. " + error);
+      }
     }
   }
 
 
   return (
     <div className='w-full h-screen bg-[#ECEEFF]'>
-      <Navbar />
+      {/* <Navbar /> */}
 
       <div className='flex items-center justify-center min-h-screen'>
 
@@ -55,7 +64,7 @@ export default function signin() {
           {/* <div className="absolute -top-2 -left-2 w-4 h-4 bg-indigo-50 rounded-tr-md"></div>
         <div className="absolute -bottom-2 -right-2 w-4 h-4 bg-indigo-50 rounded-tl-md"></div> */}
 
-            {/* Text heading */}
+          {/* Text heading */}
           <h2 className="text-2xl font-semibold text-gray-800 mb-2">Sign in</h2>
           <p className="mb-6 text-sm text-[#8570AD]">
             New User?{" "}
@@ -73,7 +82,7 @@ export default function signin() {
                 type="email"
                 placeholder="enter your email"
                 value={email}
-                onChange={(e:React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEmail(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>
@@ -83,8 +92,8 @@ export default function signin() {
               <input
                 type="password"
                 placeholder="enter your password"
-                 value={password}
-                onChange={(e:React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
+                value={password}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-md outline-none focus:ring-2 focus:ring-purple-500"
               />
             </div>

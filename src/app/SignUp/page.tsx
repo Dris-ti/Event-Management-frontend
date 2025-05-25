@@ -47,7 +47,7 @@ export default function signin() {
 
     return (
         <div className='w-full h-screen bg-[#ECEEFF]'>
-            <Navbar />
+            {/* <Navbar /> */}
 
             <div className='flex items-center justify-center min-h-screen'>
 
