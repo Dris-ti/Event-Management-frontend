@@ -12,14 +12,14 @@ import { BiChair } from "react-icons/bi";
 import { VscCircleSmallFilled } from "react-icons/vsc";
 import { CalendarDays, MapPin, Clock } from 'lucide-react';
 import { EVENT } from '../Types/AllTypes'
-import { getUserFromCookie } from '../lib/auth'
-import { NextApiRequest } from 'next';
 
 
-export default function Home({user} : any) {
+
+export default function Home() {
   const [search, setsearch] = React.useState<EVENT[]>([]);
   const [futureEvents, setFutureEvents] = React.useState<EVENT[]>([]);
   const [pastEvents, setPastEvents] = React.useState<EVENT[]>([]);
+  
 
   const eventsPerPage = 6;
   const router = useRouter();
@@ -40,6 +40,7 @@ const pastEventsPage = pastEvents.slice(
   (pastPage - 1) * eventsPerPage,
   pastPage * eventsPerPage
 );
+
 
   useEffect(() => {
     const fetchUpcomingEvents = async () => {
@@ -160,7 +161,7 @@ const pastEventsPage = pastEvents.slice(
 
   return (
     <div>
-      <Navbar user={user}/>
+      <Navbar />
       {/* --------------------------------------- Hero Section ------------------------------------------------*/}
       <div className='w-screen h-screen justify-center items-center absolute '>
         <img

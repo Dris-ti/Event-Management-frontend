@@ -5,26 +5,20 @@ import Navbar from '../Components/Navbar/page';
 import Footer from '../Components/Footer/page';
 import { useAuth } from '../context/AuthContext';
 
-interface AdminDashboardLayoutProps {
+interface UserDashboardLayoutProps {
     children: React.ReactNode;
 }
 
-export default function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
-const { user, fetchUser } = useAuth();
-  const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true); // Track loading state
+export default function UserDashboardLayout({ children }: UserDashboardLayoutProps) {
+  const [isChecking, setIsChecking] = useState(true);
+    const router = useRouter();
+    const { user, fetchUser } = useAuth();
 
   useEffect(() => {
     const checkAuth = async () => {
       await fetchUser();
 
       if (!user) {
-        router.push('/SignIn');
-        return;
-      }
-
-      if (user?.type !== 'admin') {
-        alert('Unauthorized');
         router.push('/SignIn');
         return;
       }

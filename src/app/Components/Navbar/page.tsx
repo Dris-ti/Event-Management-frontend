@@ -1,61 +1,77 @@
 'use client'
 
-
 import React from 'react'
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import axios from 'axios';
+import { useAuth } from '@/app/context/AuthContext';
 
-export default function Navbar({ user }: { user: any }) {
-    const router = useRouter();
-  //const path = router.pathname;
+export default function Navbar() {
+  const router = useRouter();
+  const { user, setUser, fetchUser  } = useAuth();
+  
 
-  // // Hide navbar on login or signup pages
-  // if (path === '/SignIn' || path === '/SignUp') {
-  //   return null;
-  // }
+  const logout = async () => {
+    try {
+    const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}auth/logout`, {
+      withCredentials: true,
+    });
+
+    if (response.status === 200) {
+        setUser(null); // update context so "Hello, name" disappears
+        router.push('/Homepage');
+      }
+  } catch (error) {
+    console.error("Logout error:", error);
+    alert("Failed to logout.");
+  }
+  }
 
   return (
-    <nav className='bg-white/10 backdrop-blur-sm text-indigo-900 fixed top-0 left-0 w-full h-[10%] z-10 px=6 py-4'>
+    <nav className='bg-white/10 backdrop-blur-sm text-[#250A63] fixed top-0 left-0 w-full h-[10%] z-10 px-6 py-4'>
+      <div className='max-w-7xl mx-auto flex justify-between items-center'>
+        {/* Left Side: Logo + App Name */}
+        <div className="flex items-center gap-2">
+          <img src="/logo.svg" alt="Logo" className="w-7 h-7 rounded-full" />
+          <span className="text-xl font-semibold">
+            Event buddy<span className="text-[#250A63]">.</span>
+          </span>
+        </div>
 
-
-      <div className='max-w-7xl mx-auto px-6 py-6 fixed top-0 left-0'>
-        <div className="flex flex-col md:flex-row items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <img
-              src="/logo.svg"
-              alt="Logo"
-              className="w-7 h-7 rounded-full"
-            />
-
-            <span className="text-xl font-semibold">
-              Event buddy<span className="text-purple-700">.</span>
-            </span>
-          </div>
-
-          {/* Auth area */}
-          {user?.name ? (
+        {/* Right Side: Auth Options (conditionally shown) */}
+        {
+          user?.email ? (
             <div className="flex items-center gap-4">
-              <span className="text-md text-[#242565]">Hello, {user.name}</span>
+              <span className="text-md text-[#242565]">
+                {user.type === 'user' ? (
+                  <Link href="/UserDashboard" className="hover:underline">
+                    Hello, {user.name || user.name.split(' ')[0]}
+                  </Link>
+                ) : (
+                  <>Hello, {user.name || user.name.split(' ')[0]}</>
+                )}
+              </span>
               <button
-                onClick={() => {
-                  // Clear auth token and redirect to login
-                  document.cookie = 'token=; Max-Age=0';
-                  router.push('/login');
-                }}
-                className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-4 py-2 rounded-md text-sm flex items-center gap-1 hover:opacity-90 transition"
+                onClick={() => logout() }
+                style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
+                className="cursor-pointer text-white px-4 py-2 rounded-md text-sm flex items-center gap-1 hover:opacity-90 transition"
               >
-                <img src="/logout.svg" alt="" />
+                <img src="/logout.svg" alt="" className="w-4 h-4" />
                 Logout
               </button>
             </div>
           ) : (
             <div className="flex gap-4">
-              <Link href="/login" className="text-sm text-blue-600 hover:underline">Login</Link>
-              <Link href="/signup" className="text-sm text-blue-600 hover:underline">Sign Up</Link>
-            </div>
-          )}
+              <Link
+              style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
+               href="/SignIn" className="pt-2 pb-2 pl-4 pr-4 rounded-md text-sm text-[#fff]">Sign in</Link>
+              <Link
+              style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }} 
+              href="/SingUp" className="pt-2 pb-2 pl-4 pr-4 rounded-md text-sm text-[#fff]">Sign up</Link>
 
-        </div>
+            </div>
+          )
+        }
       </div>
     </nav>
   )

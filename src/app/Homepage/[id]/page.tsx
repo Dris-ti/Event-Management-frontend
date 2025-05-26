@@ -12,7 +12,7 @@ import { NextApiRequest } from 'next';
 
 
 
-export default function EventDetails({user} : any) {
+export default function EventDetails() {
   const [event, setEvent] = React.useState<EVENT>();
   const [selectedSeats, setSelectedSeats] = useState(1);
 
@@ -121,7 +121,7 @@ export default function EventDetails({user} : any) {
   return (
     <div className='bg-[#F9F9FF]'>
 
-      <Navbar user={user}/>
+      <Navbar/>
       <div className="px-6 py-10 max-w-6xl mx-auto text-[#1e1e4b] pt-20">
         <button className="text-[#242565] font-semibold flex items-center mb-6">
           <FiArrowLeftCircle className="mr-2" size={20} /> Back to event

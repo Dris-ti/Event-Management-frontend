@@ -4,13 +4,14 @@ import React from 'react'
 import Navbar from '../Components/Navbar/page'
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
-import { Session } from 'inspector/promises';
+import { useAuth } from '../context/AuthContext';
 
 
 export default function signin() {
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const router = useRouter();
+  const { fetchUser } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,6 +25,8 @@ export default function signin() {
       });
 
       if (response.status === 200) {
+        await fetchUser();
+        
         if (response.data.data == "admin") {
           router.replace("/AdminDashboard");
           console.log("Admin logged in successfully");
@@ -55,7 +58,18 @@ export default function signin() {
 
   return (
     <div className='w-full h-screen bg-[#ECEEFF]'>
-      {/* <Navbar /> */}
+
+          <nav className='bg-white/10 backdrop-blur-sm text-indigo-900 fixed top-0 left-0 w-full h-[10%] z-10 px-6 py-4'>
+      <div className='max-w-7xl mx-auto flex justify-between items-center'>
+        {/* Left Side: Logo + App Name */}
+        <div className="flex items-center gap-2">
+          <img src="/logo.svg" alt="Logo" className="w-7 h-7 rounded-full" />
+          <span className="text-xl font-semibold">
+            Event buddy<span className="text-purple-700">.</span>
+          </span>
+        </div>
+        </div>
+      </nav>
 
       <div className='flex items-center justify-center min-h-screen'>
 

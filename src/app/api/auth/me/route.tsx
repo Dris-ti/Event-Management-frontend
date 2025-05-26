@@ -6,7 +6,6 @@ export async function GET() {
   const cookieStore = cookies();
   const token = (await cookieStore).get('accessToken');
 
-  console.log("Token: ", token);
 
   if (!token) {
     return NextResponse.json(
@@ -23,7 +22,6 @@ export async function GET() {
 
     const decoded = verify(token.value, secret);
 
-    console.log("Decoded: ", decoded)
     return NextResponse.json(
       { message: "Authorized", 
         status : 200,
