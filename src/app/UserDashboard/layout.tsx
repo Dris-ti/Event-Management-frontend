@@ -27,7 +27,7 @@ export default function UserDashboardLayout({ children }: UserDashboardLayoutPro
     };
 
     checkAuth();
-  }, [user]); 
+  }, []); 
 
   if (isChecking) {
     return (

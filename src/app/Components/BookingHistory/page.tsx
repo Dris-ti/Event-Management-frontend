@@ -1,31 +1,13 @@
 'use client';
 
-import { EVENT } from '@/app/Types/AllTypes';
+import { EVENT, EVENTBooking } from '@/app/Types/AllTypes';
 import axios from 'axios';
-import { CalendarDays, Clock, MapPin } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 
-// const events = [
-//   {
-//     id: 1,
-//     title: 'Tech Conference 2025',
-//     date: "2024-06-10",
-//     time: "14:00:00",
-//     location: 'San Francisco, CA',
-//   },
-//   {
-//     id: 2,
-//     title: 'Tech Conference 2025',
-//     date: "2024-06-10",
-//     time: "14:00:00",
-//     location: 'San Francisco, CA',
-//   },
-// ];
-
 
 export default function BookingHistory() {
-    const [events, setEvents] = React.useState<EVENT[]>([]);
+    const [events, setEvents] = React.useState<EVENTBooking[]>([]);
     const router = useRouter();
 
     useEffect(() => {
@@ -49,16 +31,47 @@ export default function BookingHistory() {
             } catch (error) {
                 console.error('Error fetching agency information:', error);
             }
-
         }
         fetchEvents();
     }, [])
 
+    console.log("events: ", events);
+
+
+    const cancelBooking = async (bookingId: number) => {
+        try {
+            const response = await axios.post(
+                `${process.env.NEXT_PUBLIC_URL}user/cancelBooking/${bookingId}`,
+                {},
+                { withCredentials: true }
+            );
+
+            console.log("response cancel: ", response.status);
+            if (response.status === 200) {
+                setEvents(events.filter(event => event.id !== bookingId));
+                alert('Booking canceled successfully');
+            } 
+            else {
+                alert('Failed to cancel booking');
+            }
+        }
+    catch (error) {
+        if (axios.isAxiosError(error)) {
+            if (error.response && error.response.status === 403) {
+                console.error('Booking can not be cancelled 48 hours before the event.', error);
+                alert('Booking can not be cancelled 48 hours before the event.');
+            }
+        } else {
+            console.error('Error canceling booking:', error);
+            alert('Failed to cancel booking');
+        }
+    }
+}
 
 
     return (
         <div className="min-h-screen bg-[#f7f7ff]">
-            
+
             <h2 className="text-xl font-semibold text-[#242565] mb-4">
                 My Registered Events
             </h2>
@@ -73,42 +86,44 @@ export default function BookingHistory() {
                             {/* Date box */}
                             <div className="text-center bg-transparent  pr-4">
                                 <div className="text-[#3D37F1] font-bold text-sm">
-                                    {new Date(event.date).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
+                                    {new Date(event.event_id.date).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
                                 </div>
                                 <div className="text-3xl font-bold text-[#000000]">
-                                     {new Date(event.date).toLocaleString('en-US', { day: '2-digit' })}
+                                    {new Date(event.event_id.date).toLocaleString('en-US', { day: '2-digit' })}
                                 </div>
                             </div>
 
                             {/* Event Info */}
                             <div>
                                 <h3 className="text-md font-semibold text-[#242565]">
-                                    {event.title}
+                                    {event.event_id.title}
                                 </h3>
                                 <div className="flex items-center text-sm text-[#6A6A6A] gap-4 mt-1">
                                     <span className="flex items-center gap-1">
                                         <img width={18} src={'/calendar-2.svg'} />
-                                        {new Date(event.date).toLocaleDateString('en-GB', {
+                                        {new Date(event.event_id.date).toLocaleDateString('en-GB', {
                                             weekday: 'long'
                                         })}
                                     </span>
                                     <span className="flex items-center gap-1">
                                         <img width={18} src={'/clock.svg'} />
-                                        {new Date(`1970-01-01T${event.time}Z`).toLocaleTimeString('en-US', {
+                                        {new Date(`1970-01-01T${event.event_id.time}Z`).toLocaleTimeString('en-US', {
                                             hour: 'numeric',
                                             hour12: true,
                                         })}
                                     </span>
                                     <span className="flex items-center gap-1">
                                         <img width={18} src={'/location.svg'} />
-                                        {event.location}
+                                        {event.event_id.location}
                                     </span>
                                 </div>
                             </div>
                         </div>
 
                         {/* Cancel Button */}
-                        <button className="bg-gradient-to-r from-red-400 to-red-500 text-white text-sm font-medium px-4 py-2 rounded-md hover:opacity-90 transition">
+                        <button
+                            onClick={() => { cancelBooking(event.id) }}
+                            className="cursor-pointer bg-gradient-to-r from-red-400 to-red-500 text-white text-sm font-medium px-4 py-2 rounded-md hover:opacity-90 transition">
                             Cancel registration
                         </button>
                     </div>

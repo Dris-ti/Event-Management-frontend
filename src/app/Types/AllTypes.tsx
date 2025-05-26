@@ -17,9 +17,25 @@ interface  PaginationProps{
   onPageChange: (page: number) => void;
 }
 
+interface EVENTBooking {
+  id: number; // booking id
+  event_id: {
+    id: number;
+    title: string;
+    location: string;
+    date: string;
+    time: string;
+    // other fields...
+  };
+  seats_booked: number;
+  booked_at: string;
+}
+
+
 
 
 export type{
     EVENT,
-    PaginationProps
+    PaginationProps,
+    EVENTBooking
 }

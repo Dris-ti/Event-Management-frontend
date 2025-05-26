@@ -33,7 +33,7 @@ const { user, fetchUser } = useAuth();
     };
 
     checkAuth();
-  }, [user]); 
+  }, []); 
 
   if (isChecking) {
     return (
