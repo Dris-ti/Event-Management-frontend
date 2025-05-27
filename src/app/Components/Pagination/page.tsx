@@ -26,24 +26,30 @@ export default function Pagination({ currentPage, totalPages, onPageChange }: Pa
   };
 
   return (
-    <div className="flex justify-center mt-10 space-x-2">
-      {getPageNumbers().map((page, i) =>
-        typeof page === 'number' ? (
-          <button
-            key={i}
-            onClick={() => onPageChange(page)}
-            className={`w-10 h-10 rounded-md border-1 border-[#EBEBEB] text-center text-sm font-medium ${
-              page === currentPage
-                ? 'bg-[#4157FE] text-white'
-                : 'bg-white text-gray-800 hover:bg-blue-100'
-            }`}
-          >
-            {page}
-          </button>
-        ) : (
-          <span key={i} className="w-10 h-10 flex items-center justify-center text-gray-500">...</span>
-        )
-      )}
-    </div>
+<div className="flex justify-center mt-10 space-x-2">
+  {getPageNumbers().map((page, i) =>
+    typeof page === 'number' ? (
+      <button
+        key={i}
+        onClick={() => onPageChange(page)}
+        className={`w-10 h-10 rounded-md border border-[#EBEBEB] text-center text-sm font-medium ${
+          page === currentPage
+            ? 'text-white'
+            : 'bg-white text-gray-800 hover:bg-blue-100'
+        }`}
+        style={
+          page === currentPage
+            ? { background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }
+            : undefined
+        }
+      >
+        {page}
+      </button>
+    ) : (
+      <span key={i} className="w-10 h-10 flex items-center justify-center text-gray-500">...</span>
+    )
+  )}
+</div>
+
   );
 }

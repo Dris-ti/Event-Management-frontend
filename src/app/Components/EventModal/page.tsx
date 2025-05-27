@@ -128,9 +128,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
       max_seats: form.max_seats,
       available_seats: form.max_seats,
       tag: form.tag,
-      image_url: typeof form.image_url === 'string'
-        ? form.image_url
-        : form.image_url?.name || 'default.jpg',
+      image_url: form.image_url instanceof File ? form.image_url : new File([], form.image_url),
     };
 
 
@@ -139,7 +137,11 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
       if (newEvent) {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}admin/createEvent`,
           eventData,
-          { withCredentials: true });
+          { withCredentials: true,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+           });
 
         if (response.status === 201) {
           alert("Event created successfully.");
@@ -151,7 +153,11 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
       else {
         const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}admin/editEvent/${eventId}`,
           eventData,
-          { withCredentials: true });
+          { withCredentials: true,
+            headers: {
+              'Content-Type': 'multipart/form-data',
+            },
+           });
 
         if (response.status === 200) {
           alert("Event edited successfully.");
@@ -288,7 +294,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
                   id="image"
                   type="file"
                   accept=".jpg,.png"
-                  name="image"
+                  name="image_url"
                   className="hidden"
                   onChange={handleChange}
                 />

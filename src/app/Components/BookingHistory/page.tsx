@@ -129,6 +129,17 @@ export default function BookingHistory() {
                 ))}
             </div>
 
+             {/* Pagination */}
+            <div className="mt-6">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            </div>
+
+            
+
             {/* Browse More Events Button */}
             <div className="mt-10 flex justify-center">
                 <button
@@ -140,14 +151,7 @@ export default function BookingHistory() {
                 </button>
             </div>
 
-            {/* Pagination */}
-            <div className="mt-6">
-                <Pagination
-                    currentPage={currentPage}
-                    totalPages={totalPages}
-                    onPageChange={setCurrentPage}
-                />
-            </div>
+           
         </div>
     );
 }
