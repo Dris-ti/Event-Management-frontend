@@ -133,8 +133,8 @@ export default function EventManagementTable() {
                                 <td className="px-6 py-4">
                                     {event.max_seats - event.available_seats}/{event.max_seats}
                                 </td>
-                                <td className="px-6 py-4 flex items-center gap-4">
-                                    <button>
+                                <td className="flex items-center gap-4 lg:px-6 py-4 sm:justify-center">
+                                    <button className=''>
                                         <img src="/eye.svg" alt="View" className="cursor-pointer" onClick={() => { }} />
                                     </button>
 

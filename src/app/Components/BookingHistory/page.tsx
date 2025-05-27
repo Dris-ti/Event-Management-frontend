@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
 import Pagination from '../Pagination/page';
 
-
 export default function BookingHistory() {
     const [events, setEvents] = React.useState<EVENTBooking[]>([]);
     const router = useRouter();
@@ -20,34 +19,25 @@ export default function BookingHistory() {
         currentPage * eventsPerPage
     );
 
-
     useEffect(() => {
         async function fetchEvents() {
             try {
                 const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}user/bookingHistory`, { withCredentials: true });
-
                 if (response.status === 200) {
-                    console.log("response: ", response.data.data);
                     setEvents(response.data.data);
-                }
-                else {
+                } else {
                     if (response.status === 401) {
                         alert(response.statusText);
                         router.replace('/Login');
                     }
                     alert('Failed to fetch event information');
                 }
-
-
             } catch (error) {
-                console.error('Error fetching agency information:', error);
+                console.error('Error fetching event information:', error);
             }
         }
         fetchEvents();
     }, [])
-
-    console.log("events: ", events);
-
 
     const cancelBooking = async (bookingId: number) => {
         try {
@@ -57,45 +47,39 @@ export default function BookingHistory() {
                 { withCredentials: true }
             );
 
-            console.log("response cancel: ", response.status);
             if (response.status === 200) {
                 setEvents(events.filter(event => event.id !== bookingId));
                 alert('Booking canceled successfully');
-            }
-            else {
+            } else {
                 alert('Failed to cancel booking');
             }
         }
         catch (error) {
             if (axios.isAxiosError(error)) {
                 if (error.response && error.response.status === 403) {
-                    console.error('Booking can not be cancelled 48 hours before the event.', error);
-                    alert('Booking can not be cancelled 48 hours before the event.');
+                    alert('Booking cannot be cancelled 48 hours before the event.');
                 }
             } else {
-                console.error('Error canceling booking:', error);
                 alert('Failed to cancel booking');
             }
         }
     }
 
-
     return (
-        <div className="min-h-screen bg-[#f7f7ff]">
-
-            <h2 className="text-xl font-semibold text-[#242565] mb-4">
+        <div className="min-h-screen bg-[#f7f7ff] px-4 sm:px-6 md:px-8 py-6">
+            <h2 className="text-xl sm:text-2xl font-semibold text-[#242565] mb-4 text-center sm:text-left">
                 My Registered Events
             </h2>
 
             <div className="space-y-4">
-                {events.map((event) => (
+                {eventPage.map((event) => (
                     <div
                         key={event.id}
-                        className="bg-white p-4 rounded-lg border border-[#BDBBFB59] flex items-center justify-between"
+                        className="bg-white p-4 rounded-lg border border-[#BDBBFB59] flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4"
                     >
-                        <div className="flex items-center space-x-4">
+                        <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4 w-full">
                             {/* Date box */}
-                            <div className="text-center bg-transparent  pr-4">
+                            <div className="text-center sm:text-left sm:pr-4">
                                 <div className="text-[#3D37F1] font-bold text-sm">
                                     {new Date(event.event_id.date).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
                                 </div>
@@ -105,11 +89,11 @@ export default function BookingHistory() {
                             </div>
 
                             {/* Event Info */}
-                            <div>
+                            <div className="flex-1">
                                 <h3 className="text-md font-semibold text-[#242565]">
                                     {event.event_id.title}
                                 </h3>
-                                <div className="flex items-center text-sm text-[#6A6A6A] gap-4 mt-1">
+                                <div className="flex flex-wrap items-center text-sm text-[#6A6A6A] gap-2 mt-1">
                                     <span className="flex items-center gap-1">
                                         <img width={18} src={'/calendar-2.svg'} />
                                         {new Date(event.event_id.date).toLocaleDateString('en-GB', {
@@ -132,12 +116,15 @@ export default function BookingHistory() {
                         </div>
 
                         {/* Cancel Button */}
-                        <button
-                            onClick={() => { cancelBooking(event.id) }}
-                            style={{ background: 'linear-gradient(to bottom, #FF847B, #FE4141)' }}
-                            className="cursor-pointer text-white text-sm font-medium px-4 py-2 rounded-md hover:opacity-90 transition">
-                            Cancel registration
-                        </button>
+                        <div className="lg:w-[200] flex justify-center items-center sm:justify-center md:justify-center">
+                            <button
+                                onClick={() => cancelBooking(event.id)}
+                                style={{ background: 'linear-gradient(to bottom, #FF847B, #FE4141)' }}
+                                className="text-white text-sm font-medium px-4 py-2 rounded-md hover:opacity-90 transition"
+                            >
+                                Cancel registration
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -147,15 +134,20 @@ export default function BookingHistory() {
                 <button
                     onClick={() => router.push('/Homepage')}
                     style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
-                    className="text-white text-sm font-medium px-6 py-2 rounded-md hover:opacity-90 transition">
-
+                    className="text-white text-sm font-medium px-6 py-2 rounded-md hover:opacity-90 transition"
+                >
                     Browse more events
                 </button>
             </div>
-            <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                onPageChange={setCurrentPage} />
+
+            {/* Pagination */}
+            <div className="mt-6">
+                <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setCurrentPage}
+                />
+            </div>
         </div>
     );
 }

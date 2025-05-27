@@ -28,7 +28,7 @@ export default function Navbar() {
   }
 
   return (
-    <nav className='bg-white/10 backdrop-blur-sm text-[#250A63] fixed top-0 left-0 w-full h-[10%] z-10 px-6 py-4'>
+    <nav className='bg-white/10 backdrop-blur-sm text-[#250A63] fixed top-0 left-0 w-full h-[9%] z-10 px-6 py-4'>
       <div className='max-w-7xl mx-auto flex justify-between items-center'>
         {/* Left Side: Logo + App Name */}
         <div className="cursor-pointer flex items-center gap-2"
@@ -39,7 +39,7 @@ export default function Navbar() {
           </span>
         </div>
 
-        {/* Right Side: Auth Options (conditionally shown) */}
+        {/* Right Side: Auth Options */}
         {
           user?.email ? (
             <div className="flex items-center gap-4">
@@ -49,7 +49,9 @@ export default function Navbar() {
                     Hello, {user.name || user.name.split(' ')[0]}
                   </Link>
                 ) : (
-                  <>Hello, {user.name || user.name.split(' ')[0]}</>
+                  <Link href="/AdminDashboard" className="hover:underline">
+                    Hello, {user.name || user.name.split(' ')[0]}
+                  </Link>
                 )}
               </span>
               <button

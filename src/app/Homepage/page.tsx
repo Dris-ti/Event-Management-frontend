@@ -19,7 +19,7 @@ export default function Home() {
   const [search, setsearch] = React.useState<EVENT[]>([]);
   const [futureEvents, setFutureEvents] = React.useState<EVENT[]>([]);
   const [pastEvents, setPastEvents] = React.useState<EVENT[]>([]);
-  
+
 
   const eventsPerPage = 6;
   const router = useRouter();
@@ -34,12 +34,12 @@ export default function Home() {
   );
 
   // Pagination for Search Results
-const [pastPage, setPastPage] = React.useState(1);
-const pastTotalPages = Math.ceil(pastEvents.length / eventsPerPage);
-const pastEventsPage = pastEvents.slice(
-  (pastPage - 1) * eventsPerPage,
-  pastPage * eventsPerPage
-);
+  const [pastPage, setPastPage] = React.useState(1);
+  const pastTotalPages = Math.ceil(pastEvents.length / eventsPerPage);
+  const pastEventsPage = pastEvents.slice(
+    (pastPage - 1) * eventsPerPage,
+    pastPage * eventsPerPage
+  );
 
 
   useEffect(() => {
@@ -49,7 +49,7 @@ const pastEventsPage = pastEvents.slice(
           withCredentials: true,
         });
 
-        console.log("RES F: " +response.data.data);
+        console.log("RES F: " + response.data.data);
 
         if (response.status === 200) {
           setFutureEvents(response.data.data);
@@ -84,7 +84,7 @@ const pastEventsPage = pastEvents.slice(
         const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}user/pastEvents`, {
           withCredentials: true,
         });
-        
+
 
         if (response.status === 200) {
           setPastEvents(response.data.data);
@@ -158,40 +158,40 @@ const pastEventsPage = pastEvents.slice(
     <div>
       <Navbar />
       {/* --------------------------------------- Hero Section ------------------------------------------------*/}
-      <div className='w-screen h-screen justify-center items-center absolute '>
+      <div className='w-screen h-screen flex justify-center items-center absolute'>
         <img
           src="/Hero.svg"
           alt="Hero Image"
-          className='w-fit h-full '
+          className='w-full h-full object-cover'
         />
       </div>
 
-      <div className='w-screen h-screen flex flex-col justify-center items-center text-center relative'>
-        <div className='text-7xl font-bold text-[#250A63]'>
+      <div className='w-screen h-screen flex flex-col justify-center items-center text-center relative px-4'>
+        <div className='text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold text-[#250A63] leading-tight'>
           Discover
           <div className='text-[#4157FE]'>
             Amazing
             <span className=' text-[#250A63]'> Events</span>
           </div>
         </div>
-        <div className='text-xl font-medium text-[#250A63] mt-10 w-[55%]'>
+
+        <div className='text-base sm:text-lg md:text-xl font-medium text-[#250A63] mt-6 sm:mt-10 w-full sm:w-[80%] md:w-[65%] lg:w-[55%]'>
           Find and book events that match your interests. From tech conferences to music festivals, we've got you covered.
         </div>
 
-        <div className='flex flex-row justify-center items-center mt-10 text-xl text-[#250A63] font-bold'>
+        <div className='text-lg sm:text-xl text-[#250A63] font-bold mt-6 sm:mt-10'>
           Find Your Next Event
         </div>
 
         {/* Search */}
-
         <form
           onSubmit={handleSearch}
-          className='w-[40%] h-[8%] mt-5 gap-5 flex flex-row justify-center items-center bg-none'>
-          <span
-            className='flex flex-row justify-center items-center w-[100%] h-[100%] bg-[#FFFFFF70] backdrop-blur-sm border-1 border-[#BDBBFB] text-[#391E7999] text-lg font-light rounded-md'>
-            <RiSearch2Line size={28} />
+          className='w-full sm:w-[90%] md:w-[70%] lg:w-[40%] mt-4 sm:mt-5 flex flex-col sm:flex-row justify-center items-center gap-4'>
+
+          <span className='flex flex-row justify-center items-center w-full sm:w-[100%] h-12 sm:h-[100%] bg-[#FFFFFF70] backdrop-blur-sm border border-[#BDBBFB] text-[#391E7999] text-base sm:text-lg font-light rounded-md px-3'>
+            <RiSearch2Line size={24} className="mr-2" />
             <input
-              className='bg-transparent border-none w-[85%] h-full text-[#391E7999] text-lg font-light outline-none placeholder:text-[#391E7999]'
+              className='bg-transparent border-none w-full h-full text-[#391E7999] text-base sm:text-lg font-light outline-none placeholder:text-[#391E7999]'
               type='text'
               placeholder='Search events'
             />
@@ -199,16 +199,14 @@ const pastEventsPage = pastEvents.slice(
 
           <input
             type='submit'
-
-            style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
-            className='w-[50%] h-[50] rounded-md backdrop-blur-lg text-white text-lg font-medium p-2 ml-2'
             value='Search Events'
+            style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
+            className='w-full sm:w-auto h-12 rounded-md backdrop-blur-lg text-white text-base sm:text-lg font-medium px-6'
           />
         </form>
-
         {/* End of search */}
-
       </div>
+
 
       {/* ---------------------------------- End of Hero section ----------------------------------------------------*/}
 
@@ -221,7 +219,7 @@ const pastEventsPage = pastEvents.slice(
               <div
                 key={event.id}
                 className="bg-white rounded-2xl shadow p-4 hover:shadow-md transition-all"
-                onClick={()=> handleRowClick(event.id)}
+                onClick={() => handleRowClick(event.id)}
               >
                 <div className="rounded overflow-hidden mb-4">
                   <img
@@ -251,22 +249,22 @@ const pastEventsPage = pastEvents.slice(
                     </p>
                     <div className="flex items-center text-sm text-[#6A6A6A] gap-4 mb-2">
                       <div className="flex items-center gap-1">
-                        <CalendarDays size={16} color='#8570AD'/>
+                        <CalendarDays size={16} color='#8570AD' />
                         {new Date(event.date).toLocaleString('en-US', { weekday: 'long' })}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Clock size={16} color='#8570AD'/> {new Date(`1970-01-01T${event.time}Z`).toLocaleTimeString('en-US', {
+                        <Clock size={16} color='#8570AD' /> {new Date(`1970-01-01T${event.time}Z`).toLocaleTimeString('en-US', {
                           hour: 'numeric',
                           hour12: true,
                         })}
                       </div>
                       <div className="flex items-center gap-1">
-                        <MapPin size={16} color='#8570AD'/> {event.location}
+                        <MapPin size={16} color='#8570AD' /> {event.location}
                       </div>
                     </div>
                     <div className="flex gap-2 mb-2 ml-2">
                       {event.tag?.map((tag) => (
-                        
+
                         <span
                           key={tag}
                           className="bg-[#DADEFF] text-[#1D4ED8] text-sm font-medium px-3 py-1 pl-1 rounded flex flex-row items-start"
@@ -277,7 +275,7 @@ const pastEventsPage = pastEvents.slice(
                     </div>
                     <div className="text-sm flex justify-between items-center border-t pt-2">
                       <span className="flex items-center gap-1 text-[#8570AD]">
-                        <BiChair size={18} color='#8570AD'/>
+                        <BiChair size={18} color='#8570AD' />
                         {event.available_seats} Spots Left
                       </span>
                       <span className="text-right text-[#8570AD]">Total {event.max_seats} Seats</span>
@@ -291,7 +289,7 @@ const pastEventsPage = pastEvents.slice(
 
       </div>
 
-  
+
       <Pagination
         currentPage={futurePage}
         totalPages={futureTotalPages}
@@ -309,7 +307,7 @@ const pastEventsPage = pastEvents.slice(
               <div
                 key={event.id}
                 className="bg-white rounded-2xl shadow p-4 hover:shadow-md transition-all"
-                onClick={()=> handleRowClick(event.id)}
+                onClick={() => handleRowClick(event.id)}
               >
                 <div className="rounded overflow-hidden mb-4">
                   <img
@@ -339,22 +337,22 @@ const pastEventsPage = pastEvents.slice(
                     </p>
                     <div className="flex items-center text-sm text-gray-500 gap-4 mb-2">
                       <div className="flex items-center gap-1">
-                        <CalendarDays size={16} color='#8570AD'/>
+                        <CalendarDays size={16} color='#8570AD' />
                         {new Date(event.date).toLocaleString('en-US', { weekday: 'long' })}
                       </div>
                       <div className="flex items-center gap-1">
-                        <Clock size={16} color='#8570AD'/> {new Date(`1970-01-01T${event.time}Z`).toLocaleTimeString('en-US', {
+                        <Clock size={16} color='#8570AD' /> {new Date(`1970-01-01T${event.time}Z`).toLocaleTimeString('en-US', {
                           hour: 'numeric',
                           hour12: true,
                         })}
                       </div>
                       <div className="flex items-center gap-1">
-                        <MapPin size={16} color='#8570AD'/> {event.location}
+                        <MapPin size={16} color='#8570AD' /> {event.location}
                       </div>
                     </div>
                     <div className="flex gap-2 mb-2">
                       {event.tag?.map((tag) => (
-                        
+
                         <span
                           key={tag}
                           className="bg-[#DADEFF] text-[#1D4ED8] text-sm font-medium px-3 py-1 pl-1 rounded flex flex-row items-start"
@@ -365,7 +363,7 @@ const pastEventsPage = pastEvents.slice(
                     </div>
                     <div className="text-sm flex justify-between items-center border-t pt-2">
                       <span className="flex items-center gap-1 text-[#8570AD]">
-                        <BiChair size={18} color='#8570AD'/>
+                        <BiChair size={18} color='#8570AD' />
                         {event.available_seats} Spots Left
                       </span>
                       <span className="text-right text-[#8570AD]">Total {event.max_seats} Seats</span>
@@ -379,7 +377,7 @@ const pastEventsPage = pastEvents.slice(
 
       </div>
 
-  
+
       <Pagination
         currentPage={pastPage}
         totalPages={pastTotalPages}
