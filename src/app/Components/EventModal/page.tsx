@@ -5,9 +5,13 @@ import { X } from 'lucide-react';
 
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-import { format, parse } from 'date-fns';
+import { format, parse, set } from 'date-fns';
 import { FaRegCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
+import dayjs from 'dayjs';
+import customParseFormat from "dayjs/plugin/customParseFormat";
+import { EVENT } from '@/app/Types/AllTypes';
+dayjs.extend(customParseFormat);
 
 type Props = {
   isOpen: boolean;
@@ -17,32 +21,40 @@ type Props = {
 };
 
 const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => {
-  const [form, setForm] = useState({
-    title: '',
-    date: '',
-    time: '',
-    description: '',
-    location: '',
-    capacity: '',
-    tags: '',
-    image: null as File | null,
+  const [newEvent, setNewEvent] = useState(true);
+  const [form, setForm] = useState<EVENT>({
+  id: '', 
+  title: '',
+  date: '',
+  time: '',
+  description: '',
+  location: '',
+  max_seats: 0,
+  available_seats: 0,
+  tag: [],
+  image_url: new File([], 'default.jpg'),
   });
+
 
   useEffect(() => {
     const fetchEvent = async () => {
       if (eventId === 0) {
         // Reset form for new event
         setForm({
+          id: '',
           title: '',
           date: '',
           time: '',
           description: '',
           location: '',
-          capacity: '',
-          tags: '',
-          image: null,
+          max_seats: 0,
+          available_seats: 0,
+          tag: [],
+          image_url: new File([], "default.jpg"),
         });
+        setNewEvent(true);
       } else {
+        setNewEvent(false);
         try {
           const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}admin/showEvent/${eventId}`, {
             withCredentials: true,
@@ -54,14 +66,16 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
           const data = response.data.data;
 
           setForm({
+            id: data.id,
             title: data.title || '',
             date: data.date ? format(new Date(data.date), 'dd/MM/yyyy') : '',
-            time: data.time || '',
+            time: data.time ? dayjs(data.time, "HH:mm:ss").format("hh:mm A") : '',
             description: data.description || '',
             location: data.location || '',
-            capacity: data.max_seats?.toString() || '',
-            tags: data.tags?.join(', ') || '',
-            image: data.image_url || null, // 
+            max_seats: data.max_seats || 0,
+            available_seats: data.available_seats || 0,
+            tag: data.tags || [],
+            image_url: data.image_url || 'default.jpg',
           });
         } catch (error) {
           console.error('Error fetching event:', error);
@@ -78,47 +92,90 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, files } = e.target as any;
-    setForm((prev) => ({
-      ...prev,
-      [name]: files ? files[0] : value,
-    }));
+
+    setForm((prev) => {
+      if (!prev) return prev;
+
+      if (name === 'max_seats') {
+        return { ...prev, max_seats: parseInt(value), available_seats: parseInt(value) };
+      }
+
+      if (name === 'tag') {
+        return { ...prev, tag: value.split(',').map((t: string) => t.trim()) };
+      }
+
+      if (name === 'image_url') {
+        return { ...prev, image_url: files ? files[0] : prev.image_url };
+      }
+
+      return { ...prev, [name]: value };
+    });
   };
 
-  const handleSubmit = () => {
-    onCreate(async () => {
-      try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}admin/createEvent`, {
-          form,
-          withCredentials: true,
-        });
+
+  const handleSubmit = async () => {
+    const formattedDate = dayjs(form.date, "DD/MM/YYYY").format("YYYY-MM-DD");
+    const formattedTime = dayjs(form.time, ["hh:mm A"]).format("HH:mm:ss");
+
+    console.log('Formatted time:', formattedTime);
+
+    const eventData = {
+      title: form.title,
+      description: form.description,
+      location: form.location,
+      date: formattedDate,
+      time: formattedTime,
+      max_seats: form.max_seats,
+      available_seats: form.max_seats,
+      tag: form.tag,
+      image_url: typeof form.image_url === 'string'
+        ? form.image_url
+        : form.image_url?.name || 'default.jpg',
+    };
+
+
+    console.log('Submitting event data:', eventData);
+    try {
+      if (newEvent) {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}admin/createEvent`,
+          eventData,
+          { withCredentials: true });
 
         if (response.status === 201) {
-          alert("Event edited successfully.");
+          alert("Event created successfully.");
+          onCreate(form);
+        } else {
+          alert("Event failed to create.");
         }
-        else {
+      }
+      else {
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}admin/editEvent/${eventId}`,
+          eventData,
+          { withCredentials: true });
+
+        if (response.status === 200) {
+          alert("Event edited successfully.");
+          onCreate(form); 
+        } else {
+          console.error('Failed to edit event:', response.data);
           alert("Event failed to edit.");
         }
       }
-      catch (error) {
-        console.error('Error submitting event:', error);
-        alert('Failed to submit event. Please check your data and try again.');
-      }
-
-    });
-    onClose();
+      onClose(); 
+    } catch (error) {
+      console.error('Error submitting event:', error);
+      alert('Failed to submit event. Please check your data and try again.');
+    }
   };
-
-  const parsedDate = form.date
-    ? parse(form.date, 'dd/MM/yyyy', new Date())
-    : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
       <div className="bg-white rounded-2xl w-full max-w-lg p-6 relative shadow-xl">
-        <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
+        <button onClick={onClose} className="absolute top-4 right-4 text-[#191F38] hover:text-gray-600">
           <X />
         </button>
-        <h2 className="text-xl font-semibold text-[#242565] mb-6">Create New Event</h2>
+        
+        <h2 className="text-xl font-semibold text-[#242565] mb-6">{newEvent ? 'Create New Event' : 'Edit Event'}</h2>
 
         <div className="space-y-4 text-[#242565]">
           <label className="block text-sm font-medium text-[#242565] mb-1">Title</label>
@@ -127,7 +184,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
             name="title"
             value={form.title}
             onChange={handleChange}
-            className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm"
+            className="w-full border border-[#E5E9EB] px-4 py-2 rounded-md text-sm"
           />
 
           <div className="flex text-[#242565] gap-4">
@@ -144,9 +201,9 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
                   }}
                   dateFormat="dd/MM/yyyy"
                   placeholderText="dd/mm/yyyy"
-                  className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm pr-10"
+                  className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm pr-10"
                 />
-                <img src='/calendar.svg' className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+                <img src='/calendar.svg' className="absolute right-3 top-1/2 transform -translate-y-1/2" />
               </div>
             </div>
 
@@ -159,9 +216,9 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
                   placeholder="e.g. 09:00 AM - 11:00 AM"
                   value={form.time}
                   onChange={handleChange}
-                  className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm"
+                  className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
                 />
-                <img src='/clock sm.svg' className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[#8570AD] pointer-events-none" />
+                <img src='/clock sm.svg' className="absolute right-3 top-1/2 transform -translate-y-1/2" />
               </div>
 
 
@@ -177,7 +234,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm resize-none h-20 text-[#242565]"
+            className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm resize-none h-20 text-[#242565]"
           />
 
           <label className="block text-sm font-medium text-[#242565] mb-1">Location</label>
@@ -187,7 +244,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
             name="location"
             value={form.location}
             onChange={handleChange}
-            className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm"
+            className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
           />
 
           <div className="flex text-[#242565] gap-4">
@@ -196,10 +253,10 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
 
               <input
                 type="number"
-                name="capacity"
-                value={form.capacity}
+                name="max_seats"
+                value={form.max_seats}
                 onChange={handleChange}
-                className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm"
+                className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
               />
             </div>
 
@@ -208,10 +265,10 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
 
               <input
                 type="text"
-                name="tags"
-                value={form.tags}
+                name="tag"
+                value={form.tag}
                 onChange={handleChange}
-                className="w-full border border-gray-300 px-4 py-2 rounded-md text-sm"
+                className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
               />
             </div>
           </div>
@@ -237,11 +294,6 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
                 />
               </label>
 
-              {/* {form.image && (
-              <p className="mt-2 text-xs text-green-600">Selected: {form.image.name}</p>
-            )} */}
-
-
             </div>
           </div>
         </div>
@@ -249,16 +301,16 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
         <div className="mt-6 flex justify-end gap-3">
           <button
             onClick={onClose}
-            className="text-gray-600 hover:text-gray-800 text-sm"
+            className="text-[#6A6A6A] hover:opacity-90 text-sm"
           >
             Cancel
           </button>
           <button
             onClick={handleSubmit}
-            className="bg-[#6F7EFF] hover:bg-[#5c6cf2] text-white px-4 py-2 rounded-md text-sm"
+            className="cursor-pointer bg-[#6F7EFF] hover:opacity-90 text-white px-4 py-2 rounded-md text-sm"
             style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
           >
-            Create Event
+            {newEvent ? 'Create Event' : 'Edit Event'}
           </button>
         </div>
       </div>

@@ -12,7 +12,7 @@ interface AdminDashboardLayoutProps {
 export default function AdminDashboardLayout({ children }: AdminDashboardLayoutProps) {
 const { user, fetchUser } = useAuth();
   const router = useRouter();
-  const [isChecking, setIsChecking] = useState(true); // Track loading state
+  const [isChecking, setIsChecking] = useState(true); 
 
   useEffect(() => {
     const checkAuth = async () => {

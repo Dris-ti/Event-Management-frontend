@@ -22,7 +22,6 @@ export default function UserDashboardLayout({ children }: UserDashboardLayoutPro
         router.push('/SignIn');
         return;
       }
-
       setIsChecking(false);
     };
 

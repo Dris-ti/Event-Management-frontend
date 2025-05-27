@@ -3,78 +3,88 @@ import { EVENT } from '@/app/Types/AllTypes';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react'
+import Pagination from '../Pagination/page';
 
-const events = [
-    {
-        id: 1,
-        title: 'Tech Conference 2025',
-        date: "2024-06-10",
-        time: "14:00:00",
-        location: 'San Francisco, CA',
-        max_seats: 100,
-        available_seats: 100,
-    },
-    {
-        id: 2,
-        title: 'Tech Conference 2025',
-        date: "2024-06-10",
-        time: "14:00:00",
-        location: 'San Francisco, CA',
-        max_seats: 100,
-        available_seats: 100,
-    },
-];
 
 export default function EventManagementTable() {
     const [showModal, setShowModal] = React.useState(false);
     const [selectedEventId, setSelectedEventId] = React.useState<number>(0);
-    // const [events, setEvents] = React.useState<EVENT[]>([]);
-    // const router = useRouter();
+    const [events, setEvents] = React.useState<EVENT[]>([]);
+    const router = useRouter();
 
-    // useEffect(() => {
-    //     const fetchEvents = async () => {
-    //         try {
-    //             console.log("Fetching events...");
-    //             const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}admin/showallEvents`, {
-    //                 withCredentials: true,
-    //             });
-    //             console.log("Response:", response.data);
+    // Pagination
+    const eventsPerPage = 8;
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const totalPages = Math.ceil(events.length / eventsPerPage);
+    const eventPage = events.slice(
+    (currentPage - 1) * eventsPerPage,
+    currentPage * eventsPerPage
+  );
 
-    //             if (response.status === 200) {
-    //                 setEvents(response.data.data);
-    //             } else {
-    //                 setEvents([]);
-    //             }
-    //         }
-    //         catch (error) {
-    //             console.error("Error fetching events:", error);
-    //             if (axios.isAxiosError(error) && error.response) {
-    //                 // Handle server response errors
-    //                 const { status, data } = error.response;
-    //                 if (status === 401) {
-    //                     alert(data?.error?.message || "Invalid email or password");
-    //                     router.push('/SignIn');
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                console.log("Fetching events...");
+                const response = await axios.get(`${process.env.NEXT_PUBLIC_URL}admin/showallEvents`, {
+                    withCredentials: true,
+                });
+                console.log("Response:", response.data);
 
-    //                 } else {
-    //                     alert("An unexpected error occurred. Please try again.");
-    //                 }
-    //             } else {
-    //                 // Handle unexpected errors
-    //                 console.error("Error:", error);
-    //                 alert("Network or server error. Please try again. " + error);
-    //             }
-    //         };
-    //     }
-    //     fetchEvents();
-    // }, []);
+                if (response.status === 200) {
+                    setEvents(response.data.data);
+                } else {
+                    setEvents([]);
+                }
+            }
+            catch (error) {
+                console.error("Error fetching events:", error);
+                if (axios.isAxiosError(error) && error.response) {
+                    // Handle server response errors
+                    const { status, data } = error.response;
+                    if (status === 401) {
+                        alert(data?.error?.message || "Invalid email or password");
+                        router.push('/SignIn');
+
+                    } else {
+                        alert("An unexpected error occurred. Please try again.");
+                    }
+                } else {
+                    // Handle unexpected errors
+                    console.error("Error:", error);
+                    alert("Network or server error. Please try again. " + error);
+                }
+            };
+        }
+        fetchEvents();
+    }, [showModal]);
 
 
-    const onCreate = (id: number ) => {
-        setSelectedEventId(id);
+    const onCreate = (id: string | number) => {
+        setSelectedEventId(Number(id));
         setShowModal(true);
     }
 
-    const handleModal = () =>{
+    const onDelete = async (id: string | number) => {
+        const confirmDelete = window.confirm("Are you sure you want to delete this event?");
+        if (confirmDelete) {
+            try {
+                const response = await axios.delete(`${process.env.NEXT_PUBLIC_URL}admin/deleteEvent/${id}`, { withCredentials: true })
+
+                if (response.status === 200) {
+                    setEvents(events.filter(event => Number(event.id) !== Number(id)));
+                    alert("Event deleted successfully");
+                } else {
+                    alert("Failed to delete event");
+                }
+            }
+            catch (error) {
+                console.error("Error deleting event:", error);
+                alert("An error occurred while deleting the event");
+            }
+        }
+    }
+
+    const handleModal = () => {
 
     }
 
@@ -85,7 +95,7 @@ export default function EventManagementTable() {
                 <button
                     onClick={() => onCreate(0)}
                     style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
-                    className="cursor-pointer backdrop-blur-lg hover:bg-[#4D3DEA] text-white px-4 py-2 rounded-md text-sm shadow"
+                    className="cursor-pointer backdrop-blur-lg hover:opacity-90 transition text-white px-4 py-2 rounded-md text-sm shadow"
                 >
                     Create Event
                 </button>
@@ -110,7 +120,7 @@ export default function EventManagementTable() {
                         </tr>
                     </thead>
                     <tbody className="text-gray-700">
-                        {events.map((event) => (
+                        {eventPage.map((event) => (
                             <tr key={event.id} className="border-[#E6E6E6] border-b-1 hover:bg-[#E6E6E6] transition">
                                 <td className="px-6 py-4">{event.title}</td>
                                 <td className="px-6 py-4">{new Date(event.date).toLocaleDateString('en-GB', {
@@ -124,15 +134,27 @@ export default function EventManagementTable() {
                                     {event.max_seats - event.available_seats}/{event.max_seats}
                                 </td>
                                 <td className="px-6 py-4 flex items-center gap-4">
-                                    <img src="/eye.svg" alt="View" className="cursor-pointer" onClick={()=>{onCreate(event.id)}}/>
-                                    <img src="/edit.svg" alt="Edit" className="cursor-pointer" onClick={()=>{onCreate(event.id)}}/>
-                                    <img src="/trash.svg" alt="Delete" className="cursor-pointer" onClick={()=>{onCreate(event.id)}}/>
+                                    <button>
+                                        <img src="/eye.svg" alt="View" className="cursor-pointer" onClick={() => { }} />
+                                    </button>
+
+                                    <button>
+                                        <img src="/edit.svg" alt="Edit" className="cursor-pointer" onClick={() => { onCreate(event.id) }} />
+                                    </button>
+                                    <button>
+                                        <img src="/trash.svg" alt="Delete" className="cursor-pointer" onClick={() => { onDelete(event.id) }} />
+                                    </button>
+
                                 </td>
                             </tr>
                         ))}
                     </tbody>
                 </table>
             </div>
+            <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            onPageChange={setCurrentPage}/>
         </div>
     )
 }

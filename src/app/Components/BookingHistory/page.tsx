@@ -1,14 +1,25 @@
 'use client';
 
-import { EVENT, EVENTBooking } from '@/app/Types/AllTypes';
+import { EVENTBooking } from '@/app/Types/AllTypes';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useEffect } from 'react';
+import Pagination from '../Pagination/page';
 
 
 export default function BookingHistory() {
     const [events, setEvents] = React.useState<EVENTBooking[]>([]);
     const router = useRouter();
+
+    // Pagination
+    const eventsPerPage = 8;
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const totalPages = Math.ceil(events.length / eventsPerPage);
+    const eventPage = events.slice(
+        (currentPage - 1) * eventsPerPage,
+        currentPage * eventsPerPage
+    );
+
 
     useEffect(() => {
         async function fetchEvents() {
@@ -50,23 +61,23 @@ export default function BookingHistory() {
             if (response.status === 200) {
                 setEvents(events.filter(event => event.id !== bookingId));
                 alert('Booking canceled successfully');
-            } 
+            }
             else {
                 alert('Failed to cancel booking');
             }
         }
-    catch (error) {
-        if (axios.isAxiosError(error)) {
-            if (error.response && error.response.status === 403) {
-                console.error('Booking can not be cancelled 48 hours before the event.', error);
-                alert('Booking can not be cancelled 48 hours before the event.');
+        catch (error) {
+            if (axios.isAxiosError(error)) {
+                if (error.response && error.response.status === 403) {
+                    console.error('Booking can not be cancelled 48 hours before the event.', error);
+                    alert('Booking can not be cancelled 48 hours before the event.');
+                }
+            } else {
+                console.error('Error canceling booking:', error);
+                alert('Failed to cancel booking');
             }
-        } else {
-            console.error('Error canceling booking:', error);
-            alert('Failed to cancel booking');
         }
     }
-}
 
 
     return (
@@ -123,7 +134,8 @@ export default function BookingHistory() {
                         {/* Cancel Button */}
                         <button
                             onClick={() => { cancelBooking(event.id) }}
-                            className="cursor-pointer bg-gradient-to-r from-red-400 to-red-500 text-white text-sm font-medium px-4 py-2 rounded-md hover:opacity-90 transition">
+                            style={{ background: 'linear-gradient(to bottom, #FF847B, #FE4141)' }}
+                            className="cursor-pointer text-white text-sm font-medium px-4 py-2 rounded-md hover:opacity-90 transition">
                             Cancel registration
                         </button>
                     </div>
@@ -134,11 +146,16 @@ export default function BookingHistory() {
             <div className="mt-10 flex justify-center">
                 <button
                     onClick={() => router.push('/Homepage')}
-                    className="bg-gradient-to-r from-[#6b5bff] to-[#5a4bff] text-white text-sm font-medium px-6 py-2 rounded-md hover:opacity-90 transition">
+                    style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }}
+                    className="text-white text-sm font-medium px-6 py-2 rounded-md hover:opacity-90 transition">
 
                     Browse more events
                 </button>
             </div>
+            <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage} />
         </div>
     );
 }

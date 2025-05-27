@@ -7,7 +7,7 @@ interface EVENT {
   time: string,
   max_seats: number,
   available_seats: number,
-  image_url: string,
+  image_url: string | File,
   tag?: string[],
 }
 
@@ -25,7 +25,6 @@ interface EVENTBooking {
     location: string;
     date: string;
     time: string;
-    // other fields...
   };
   seats_booked: number;
   booked_at: string;

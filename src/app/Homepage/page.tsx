@@ -117,10 +117,6 @@ const pastEventsPage = pastEvents.slice(
   }
 
 
-
-
-
-
   const handleSearch = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -135,7 +131,6 @@ const pastEventsPage = pastEvents.slice(
       else {
         setsearch([]);
       }
-
     }
     catch (error) {
       if (axios.isAxiosError(error) && error.response) {
@@ -196,7 +191,7 @@ const pastEventsPage = pastEvents.slice(
             className='flex flex-row justify-center items-center w-[100%] h-[100%] bg-[#FFFFFF70] backdrop-blur-sm border-1 border-[#BDBBFB] text-[#391E7999] text-lg font-light rounded-md'>
             <RiSearch2Line size={28} />
             <input
-              className='bg-transparent border-none w-[85%] h-full text[#391E7999] text-lg font-light outline-none placeholder:text-[#391E7999]'
+              className='bg-transparent border-none w-[85%] h-full text-[#391E7999] text-lg font-light outline-none placeholder:text-[#391E7999]'
               type='text'
               placeholder='Search events'
             />
@@ -220,7 +215,7 @@ const pastEventsPage = pastEvents.slice(
       {/* ------------------------------------------------ Upcoming events ------------------------------------------------*/}
       <div>
         <div className="bg-[#f9f9ff] py-12 px-6 cursor-pointer">
-          <h2 className="text-3xl font-bold text-[#1e1e4b] mb-8">Upcoming Events</h2>
+          <h2 className="text-3xl font-bold text-[#242565] mb-8">Upcoming Events</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {futureEventsPage.map((event) => (
               <div
@@ -239,25 +234,25 @@ const pastEventsPage = pastEvents.slice(
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="text-center">
-                    <div className="text-xs font-bold text-blue-600">
+                    <div className="text-xs font-bold text-[#3D37F1]">
                       {new Date(event.date).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
                     </div>
-                    <div className="text-2xl font-bold text-[#1e1e4b]">
+                    <div className="text-2xl font-bold text-[#000000]">
                       {new Date(event.date).toLocaleString('en-US', { day: '2-digit' })}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-[#1e1e4b]">
+                    <h3 className="text-xl font-semibold text-[#242565]">
                       {event.title}
                     </h3>
                     <p className="text-sm text-gray-600 mb-2">
                       We’ll get you directly seated and inside for you to enjoy the
                       conference.
                     </p>
-                    <div className="flex items-center text-sm text-gray-500 gap-4 mb-2">
+                    <div className="flex items-center text-sm text-[#6A6A6A] gap-4 mb-2">
                       <div className="flex items-center gap-1">
                         <CalendarDays size={16} color='#8570AD'/>
-                        {new Date(event.date).toLocaleString('en-US', { weekday: 'long' }).toUpperCase()}
+                        {new Date(event.date).toLocaleString('en-US', { weekday: 'long' })}
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={16} color='#8570AD'/> {new Date(`1970-01-01T${event.time}Z`).toLocaleTimeString('en-US', {
@@ -280,7 +275,7 @@ const pastEventsPage = pastEvents.slice(
                         </span>
                       ))}
                     </div>
-                    <div className="text-sm text-gray-500 flex justify-between items-center border-t pt-2">
+                    <div className="text-sm flex justify-between items-center border-t pt-2">
                       <span className="flex items-center gap-1 text-[#8570AD]">
                         <BiChair size={18} color='#8570AD'/>
                         {event.available_seats} Spots Left
@@ -308,7 +303,7 @@ const pastEventsPage = pastEvents.slice(
       {/* ------------------------------------------------ Past events ------------------------------------------------*/}
       <div>
         <div className="bg-[#f9f9ff] py-12 px-6 cursor-pointer">
-          <h2 className="text-3xl font-bold text-[#1e1e4b] mb-8">Previous Events</h2>
+          <h2 className="text-3xl font-bold text-[#242565] mb-8">Previous Events</h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {pastEventsPage.map((event) => (
               <div
@@ -327,25 +322,25 @@ const pastEventsPage = pastEvents.slice(
                 </div>
                 <div className="flex items-start gap-4">
                   <div className="text-center">
-                    <div className="text-xs font-bold text-blue-600">
+                    <div className="text-xs font-bold text-[#3D37F1]">
                       {new Date(event.date).toLocaleString('en-US', { month: 'short' }).toUpperCase()}
                     </div>
-                    <div className="text-2xl font-bold text-[#1e1e4b]">
+                    <div className="text-2xl font-bold text-[#000000]">
                       {new Date(event.date).toLocaleString('en-US', { day: '2-digit' })}
                     </div>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold text-[#1e1e4b]">
+                    <h3 className="text-xl font-semibold text-[#242565]">
                       {event.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mb-2">
+                    <p className="text-sm text-[#6A6A6A] mb-2">
                       We’ll get you directly seated and inside for you to enjoy the
                       conference.
                     </p>
                     <div className="flex items-center text-sm text-gray-500 gap-4 mb-2">
                       <div className="flex items-center gap-1">
                         <CalendarDays size={16} color='#8570AD'/>
-                        {new Date(event.date).toLocaleString('en-US', { weekday: 'long' }).toUpperCase()}
+                        {new Date(event.date).toLocaleString('en-US', { weekday: 'long' })}
                       </div>
                       <div className="flex items-center gap-1">
                         <Clock size={16} color='#8570AD'/> {new Date(`1970-01-01T${event.time}Z`).toLocaleTimeString('en-US', {
@@ -368,7 +363,7 @@ const pastEventsPage = pastEvents.slice(
                         </span>
                       ))}
                     </div>
-                    <div className="text-sm text-gray-500 flex justify-between items-center border-t pt-2">
+                    <div className="text-sm flex justify-between items-center border-t pt-2">
                       <span className="flex items-center gap-1 text-[#8570AD]">
                         <BiChair size={18} color='#8570AD'/>
                         {event.available_seats} Spots Left

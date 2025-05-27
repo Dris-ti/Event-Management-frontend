@@ -7,8 +7,6 @@ import { VscCircleSmallFilled } from 'react-icons/vsc';
 import Navbar from '../../Components/Navbar/page'
 import Footer from '../../Components/Footer/page'
 import type { EVENT } from '../../Types/AllTypes'
-import { getUserFromCookie } from '@/app/lib/auth';
-import { NextApiRequest } from 'next';
 
 
 
@@ -123,7 +121,9 @@ export default function EventDetails() {
 
       <Navbar/>
       <div className="px-6 py-10 max-w-6xl mx-auto text-[#1e1e4b] pt-20">
-        <button className="text-[#242565] font-semibold flex items-center mb-6">
+        <button 
+        onClick={() => router.back()}
+        className="cursor-pointer text-[#242565] font-semibold flex items-center mb-6">
           <FiArrowLeftCircle className="mr-2" size={20} /> Back to event
         </button>
 

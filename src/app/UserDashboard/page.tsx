@@ -1,8 +1,6 @@
 'use client'
 import React from 'react'
 import BookingHistory from '../Components/BookingHistory/page'
-import Navbar from '../Components/Navbar/page'
-import Footer from '../Components/Footer/page'
 import { useAuth } from '../context/AuthContext';
 
 export default function UserDashboard() {
@@ -17,11 +15,6 @@ export default function UserDashboard() {
 
         <BookingHistory />
       </div>
-
-
-
-      
-
     </div>
   )
 }

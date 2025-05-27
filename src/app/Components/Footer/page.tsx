@@ -22,9 +22,9 @@ export default function Footer() {
 
           <ul className="flex gap-6 mt-4 md:mt-0 text-sm font-medium">
             <li><Link href="/" className="hover:underline">Home</Link></li>
-            <li><Link href="/signin" className="hover:underline">Sign in</Link></li>
-            <li><Link href="/signup" className="hover:underline">Sign up</Link></li>
-            <li><Link href="/privacy" className="hover:underline">Privacy Policy</Link></li>
+            <li><Link href="/SignIn" className="hover:underline">Sign in</Link></li>
+            <li><Link href="/SignUp" className="hover:underline">Sign up</Link></li>
+            <li><Link href="/" className="hover:underline">Privacy Policy</Link></li>
           </ul>
         </div>
 

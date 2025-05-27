@@ -31,7 +31,8 @@ export default function Navbar() {
     <nav className='bg-white/10 backdrop-blur-sm text-[#250A63] fixed top-0 left-0 w-full h-[10%] z-10 px-6 py-4'>
       <div className='max-w-7xl mx-auto flex justify-between items-center'>
         {/* Left Side: Logo + App Name */}
-        <div className="flex items-center gap-2">
+        <div className="cursor-pointer flex items-center gap-2"
+        onClick={() => router.push('/Homepage')}>
           <img src="/logo.svg" alt="Logo" className="w-7 h-7 rounded-full" />
           <span className="text-xl font-semibold">
             Event buddy<span className="text-[#250A63]">.</span>
@@ -67,7 +68,7 @@ export default function Navbar() {
                href="/SignIn" className="pt-2 pb-2 pl-4 pr-4 rounded-md text-sm text-[#fff]">Sign in</Link>
               <Link
               style={{ background: 'linear-gradient(to bottom, #7B8BFF, #4157FE)' }} 
-              href="/SingUp" className="pt-2 pb-2 pl-4 pr-4 rounded-md text-sm text-[#fff]">Sign up</Link>
+              href="/SignUp" className="pt-2 pb-2 pl-4 pr-4 rounded-md text-sm text-[#fff]">Sign up</Link>
 
             </div>
           )
