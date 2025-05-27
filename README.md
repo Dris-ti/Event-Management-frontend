@@ -21,5 +21,5 @@ Frontend will be available at: [http://localhost:3001](http://localhost:3001)
 ## Environment Variables
 ```bash
 NEXT_PUBLIC_URL=http://localhost:3000/
-ACCESS_TOKEN_SECRET=tour-guide-2024
+ACCESS_TOKEN_SECRET=secret
 ```
