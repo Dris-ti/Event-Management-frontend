@@ -16,10 +16,9 @@ export default function EventManagementTable() {
     const eventsPerPage = 8;
     const [currentPage, setCurrentPage] = React.useState(1);
     const totalPages = Math.ceil(events.length / eventsPerPage);
-    const eventPage = events.slice(
-    (currentPage - 1) * eventsPerPage,
-    currentPage * eventsPerPage
-  );
+    const eventPage = Array.isArray(events)
+  ? events.slice((currentPage - 1) * eventsPerPage, currentPage * eventsPerPage)
+  : [];
 
     useEffect(() => {
         const fetchEvents = async () => {
@@ -70,11 +69,14 @@ export default function EventManagementTable() {
             try {
                 const response = await axios.delete(`${process.env.NEXT_PUBLIC_URL}admin/deleteEvent/${id}`, { withCredentials: true })
 
-                if (response.status === 200) {
-                    setEvents(events.filter(event => Number(event.id) !== Number(id)));
-                    alert("Event deleted successfully");
+                console.log("Type of data:", typeof response.data.data);
+                console.log("Data:", response.data.data);
+
+                if (response.status === 200 && Array.isArray(response.data.data)) {
+                    setEvents(response.data.data);
                 } else {
-                    alert("Failed to delete event");
+                    console.warn("Expected an array but got:", response.data.data);
+                    setEvents([]);
                 }
             }
             catch (error) {
@@ -152,9 +154,9 @@ export default function EventManagementTable() {
                 </table>
             </div>
             <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            onPageChange={setCurrentPage}/>
+                currentPage={currentPage}
+                totalPages={totalPages}
+                onPageChange={setCurrentPage} />
         </div>
     )
 }

@@ -6,7 +6,6 @@ import { X } from 'lucide-react';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { format, parse, set } from 'date-fns';
-import { FaRegCalendarAlt } from 'react-icons/fa';
 import axios from 'axios';
 import dayjs from 'dayjs';
 import customParseFormat from "dayjs/plugin/customParseFormat";
@@ -23,17 +22,19 @@ type Props = {
 const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => {
   const [newEvent, setNewEvent] = useState(true);
   const [form, setForm] = useState<EVENT>({
-  id: '', 
-  title: '',
-  date: '',
-  time: '',
-  description: '',
-  location: '',
-  max_seats: 0,
-  available_seats: 0,
-  tag: [],
-  image_url: new File([], 'default.jpg'),
+    id: '',
+    title: '',
+    date: '',
+    time: '',
+    description: '',
+    location: '',
+    max_seats: 0,
+    available_seats: 0,
+    tag: [],
+    image_url: new File([], 'default.jpg'),
   });
+
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
 
 
   useEffect(() => {
@@ -64,6 +65,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
             alert("Failed to load event details.")
           }
           const data = response.data.data;
+          setImagePreview(data.image_url || null);
 
           setForm({
             id: data.id,
@@ -74,9 +76,10 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
             location: data.location || '',
             max_seats: data.max_seats || 0,
             available_seats: data.available_seats || 0,
-            tag: data.tags || [],
-            image_url: data.image_url || 'default.jpg',
+            tag: data.tag || [],
+            image_url: data.image_url || '',
           });
+          setImagePreview(data.image_url || null);
         } catch (error) {
           console.error('Error fetching event:', error);
           alert('Failed to load event details.');
@@ -87,6 +90,11 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
     fetchEvent();
   }, [eventId]);
 
+  useEffect(() => {
+    if (!isOpen) {
+      setImagePreview(null); // Reset image when modal is closed
+    }
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -94,8 +102,6 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
     const { name, value, files } = e.target as any;
 
     setForm((prev) => {
-      if (!prev) return prev;
-
       if (name === 'max_seats') {
         return { ...prev, max_seats: parseInt(value), available_seats: parseInt(value) };
       }
@@ -105,11 +111,21 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
       }
 
       if (name === 'image_url') {
-        return { ...prev, image_url: files ? files[0] : prev.image_url };
+        if (files && files.length > 0) {
+          const reader = new FileReader();
+          reader.onloadend = () => {
+            setImagePreview(reader.result as string);
+          };
+          reader.readAsDataURL(files[0]);
+
+          return { ...prev, image_url: files[0] };
+        }
+        return { ...prev, [name]: value };
       }
 
       return { ...prev, [name]: value };
     });
+
   };
 
 
@@ -119,55 +135,42 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
 
     console.log('Formatted time:', formattedTime);
 
-    const eventData = {
-      title: form.title,
-      description: form.description,
-      location: form.location,
-      date: formattedDate,
-      time: formattedTime,
-      max_seats: form.max_seats,
-      available_seats: form.max_seats,
-      tag: form.tag,
-      image_url: form.image_url instanceof File ? form.image_url : new File([], form.image_url),
-    };
+    const eventData = new FormData();
+    eventData.append('title', form.title);
+    eventData.append('description', form.description);
+    eventData.append('location', form.location);
+    eventData.append('date', formattedDate);
+    eventData.append('time', formattedTime);
+    eventData.append('max_seats', String(form.max_seats));
+    eventData.append('available_seats', String(form.max_seats));
+    (form.tag ?? []).forEach((tag) => {
+      eventData.append('tag', tag);
+    });
 
+    if (form.image_url && typeof form.image_url !== 'string') {
+      eventData.append('image_url', form.image_url);
+    }
+    for (let [key, value] of eventData.entries()) {
+      console.log(key, value);
+    }
 
-    console.log('Submitting event data:', eventData);
     try {
-      if (newEvent) {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}admin/createEvent`,
-          eventData,
-          { withCredentials: true,
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-           });
+      const url = newEvent
+        ? `${process.env.NEXT_PUBLIC_URL}admin/createEvent`
+        : `${process.env.NEXT_PUBLIC_URL}admin/editEvent/${eventId}`;
 
-        if (response.status === 201) {
-          alert("Event created successfully.");
-          onCreate(form);
-        } else {
-          alert("Event failed to create.");
-        }
-      }
-      else {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_URL}admin/editEvent/${eventId}`,
-          eventData,
-          { withCredentials: true,
-            headers: {
-              'Content-Type': 'multipart/form-data',
-            },
-           });
+      const response = await axios.post(url, eventData, {
+        withCredentials: true,
+      });
 
-        if (response.status === 200) {
-          alert("Event edited successfully.");
-          onCreate(form); 
-        } else {
-          console.error('Failed to edit event:', response.data);
-          alert("Event failed to edit.");
-        }
+
+      if ((newEvent && response.status === 201) || (!newEvent && response.status === 200)) {
+        alert(`Event ${newEvent ? "created" : "edited"} successfully.`);
+        onCreate(form);
+        onClose();
+      } else {
+        alert(`Event failed to ${newEvent ? "create" : "edit"}.`);
       }
-      onClose(); 
     } catch (error) {
       console.error('Error submitting event:', error);
       alert('Failed to submit event. Please check your data and try again.');
@@ -180,7 +183,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
         <button onClick={onClose} className="absolute top-4 right-4 text-[#191F38] hover:text-gray-600">
           <X />
         </button>
-        
+
         <h2 className="text-xl font-semibold text-[#242565] mb-6">{newEvent ? 'Create New Event' : 'Edit Event'}</h2>
 
         <div className="space-y-4 text-[#242565]">
@@ -188,7 +191,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
           <input
             type="text"
             name="title"
-            value={form.title}
+            value={form.title ?? ''}
             onChange={handleChange}
             className="w-full border border-[#E5E9EB] px-4 py-2 rounded-md text-sm"
           />
@@ -220,7 +223,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
                   type="text"
                   name="time"
                   placeholder="e.g. 09:00 AM - 11:00 AM"
-                  value={form.time}
+                  value={form.time ?? ''}
                   onChange={handleChange}
                   className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
                 />
@@ -248,7 +251,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
           <input
             type="text"
             name="location"
-            value={form.location}
+            value={form.location ?? ''}
             onChange={handleChange}
             className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
           />
@@ -260,7 +263,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
               <input
                 type="number"
                 name="max_seats"
-                value={form.max_seats}
+                value={form.max_seats ?? ''}
                 onChange={handleChange}
                 className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
               />
@@ -272,7 +275,7 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
               <input
                 type="text"
                 name="tag"
-                value={form.tag}
+                value={(form.tag ?? []).join(', ')}
                 onChange={handleChange}
                 className="w-full border border-[#E5E9EB] placeholder-[#6F6F6F] px-4 py-2 rounded-md text-sm"
               />
@@ -282,8 +285,14 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
 
           <div>
             <label className="block text-sm font-medium text-[#242565] mb-1">Image</label>
-            <div className='flex gap-2'>
-              <img src='/Frame 2.svg' />
+            <div className='flex gap-2 items-center'>
+              {imagePreview ? (
+                <div className="relative w-10 h-10 border-2 border-[#242565] rounded overflow-hidden shadow-md">
+                  <img src={imagePreview} alt="Preview" className="object-cover w-full h-full" />
+                </div>
+              ) : (
+                <img src='/Frame 2.svg' alt="Placeholder" className="lg:w-13 lg:h-13 " />
+              )}
 
               <label htmlFor="image" className="cursor-pointer block">
                 <p className='text-sm'>
@@ -299,9 +308,11 @@ const EventModal: React.FC<Props> = ({ isOpen, onClose, onCreate, eventId }) => 
                   onChange={handleChange}
                 />
               </label>
-
             </div>
           </div>
+
+
+
         </div>
 
         <div className="mt-6 flex justify-end gap-3">
